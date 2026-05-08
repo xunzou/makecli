@@ -15,7 +15,6 @@ import (
 )
 
 func newRecordGetCmd() *cobra.Command {
-	var profile string
 	var output string
 
 	cmd := &cobra.Command{
@@ -26,21 +25,20 @@ func newRecordGetCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
 			entity, _ := cmd.Parent().Flags().GetString("entity")
-			return runRecordGet(app, entity, args[0], profile, output)
+			return runRecordGet(app, entity, args[0], output)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().StringVar(&output, "output", outputTable, "output format (table|json)")
 	return cmd
 }
 
-func runRecordGet(app, entity, recordID, profile, output string) error {
+func runRecordGet(app, entity, recordID, output string) error {
 	if err := validateOutputFormat(output); err != nil {
 		return err
 	}
 
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

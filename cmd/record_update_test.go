@@ -38,7 +38,7 @@ func TestRunRecordUpdate(t *testing.T) {
 		jsonFile := writeRecordJSON(t, map[string]any{"status": "done"})
 
 		out := captureStdout(t, func() {
-			if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile, "default"); err != nil {
+			if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile); err != nil {
 				t.Fatalf("runRecordUpdate single: %v", err)
 			}
 		})
@@ -68,7 +68,7 @@ func TestRunRecordUpdate(t *testing.T) {
 
 		out := captureStdout(t, func() {
 			ids := []string{"rec-001", "rec-002", "rec-003"}
-			if err := runRecordUpdate("myapp", "tasks", ids, jsonFile, "default"); err != nil {
+			if err := runRecordUpdate("myapp", "tasks", ids, jsonFile); err != nil {
 				t.Fatalf("runRecordUpdate batch: %v", err)
 			}
 		})
@@ -83,7 +83,7 @@ func TestRunRecordUpdate(t *testing.T) {
 
 		jsonFile := writeRecordJSON(t, map[string]any{"status": "done"})
 
-		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile, "default"); err == nil {
+		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -101,7 +101,7 @@ func TestRunRecordUpdate(t *testing.T) {
 
 		jsonFile := writeRecordJSON(t, map[string]any{"status": "done"})
 
-		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile, "default"); err == nil {
+		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -110,10 +110,11 @@ func TestRunRecordUpdate(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
 		jsonFile := writeRecordJSON(t, map[string]any{"status": "done"})
 
-		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile, "nonexistent"); err == nil {
+		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, jsonFile); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -126,7 +127,7 @@ func TestRunRecordUpdate(t *testing.T) {
 		bad := filepath.Join(t.TempDir(), "bad.json")
 		_ = os.WriteFile(bad, []byte("not json"), 0644)
 
-		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, bad, "default"); err == nil {
+		if err := runRecordUpdate("myapp", "tasks", []string{"rec-001"}, bad); err == nil {
 			t.Fatal("expected error for invalid JSON")
 		}
 	})

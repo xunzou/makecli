@@ -27,7 +27,7 @@ func TestRunRelationCreate(t *testing.T) {
 			"to":   map[string]any{"entity": "任务", "cardinality": "one"},
 		})
 
-		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile, "default"); err != nil {
+		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile); err != nil {
 			t.Fatalf("runRelationCreate: %v", err)
 		}
 	})
@@ -41,7 +41,7 @@ func TestRunRelationCreate(t *testing.T) {
 			"to":   map[string]any{"entity": "任务", "cardinality": "one"},
 		})
 
-		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile, "default"); err == nil {
+		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -58,7 +58,7 @@ func TestRunRelationCreate(t *testing.T) {
 			"to":   map[string]any{"entity": "任务", "cardinality": "one"},
 		})
 
-		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile, "default"); err == nil {
+		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -67,13 +67,14 @@ func TestRunRelationCreate(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
 		jsonFile := writeRelationJSON(t, map[string]any{
 			"from": map[string]any{"entity": "项目", "cardinality": "many"},
 			"to":   map[string]any{"entity": "任务", "cardinality": "one"},
 		})
 
-		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile, "nonexistent"); err == nil {
+		if err := runRelationCreate("project-has-tasks", "TODO", jsonFile); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -86,7 +87,7 @@ func TestRunRelationCreate(t *testing.T) {
 		bad := filepath.Join(t.TempDir(), "bad.json")
 		_ = os.WriteFile(bad, []byte("not json"), 0644)
 
-		if err := runRelationCreate("project-has-tasks", "TODO", bad, "default"); err == nil {
+		if err := runRelationCreate("project-has-tasks", "TODO", bad); err == nil {
 			t.Fatal("expected error for invalid JSON")
 		}
 	})
@@ -96,7 +97,7 @@ func TestRunRelationCreate(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
 
-		if err := runRelationCreate("project-has-tasks", "TODO", "/nonexistent.json", "default"); err == nil {
+		if err := runRelationCreate("project-has-tasks", "TODO", "/nonexistent.json"); err == nil {
 			t.Fatal("expected error for nonexistent file")
 		}
 	})

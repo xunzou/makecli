@@ -37,7 +37,7 @@ func TestRunRecordCreate(t *testing.T) {
 		})
 
 		output := captureStdout(t, func() {
-			if err := runRecordCreate("TODO", "Task", jsonFile, "default"); err != nil {
+			if err := runRecordCreate("TODO", "Task", jsonFile); err != nil {
 				t.Fatalf("runRecordCreate: %v", err)
 			}
 		})
@@ -53,7 +53,7 @@ func TestRunRecordCreate(t *testing.T) {
 
 		jsonFile := writeRecordJSON(t, map[string]any{"title": "Test"})
 
-		if err := runRecordCreate("TODO", "Task", jsonFile, "default"); err == nil {
+		if err := runRecordCreate("TODO", "Task", jsonFile); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -73,7 +73,7 @@ func TestRunRecordCreate(t *testing.T) {
 
 		jsonFile := writeRecordJSON(t, map[string]any{"title": "Test"})
 
-		if err := runRecordCreate("TODO", "Task", jsonFile, "default"); err == nil {
+		if err := runRecordCreate("TODO", "Task", jsonFile); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -82,10 +82,11 @@ func TestRunRecordCreate(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
 		jsonFile := writeRecordJSON(t, map[string]any{"title": "Test"})
 
-		if err := runRecordCreate("TODO", "Task", jsonFile, "nonexistent"); err == nil {
+		if err := runRecordCreate("TODO", "Task", jsonFile); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -98,7 +99,7 @@ func TestRunRecordCreate(t *testing.T) {
 		bad := filepath.Join(t.TempDir(), "bad.json")
 		_ = os.WriteFile(bad, []byte("not json"), 0644)
 
-		if err := runRecordCreate("TODO", "Task", bad, "default"); err == nil {
+		if err := runRecordCreate("TODO", "Task", bad); err == nil {
 			t.Fatal("expected error for invalid JSON")
 		}
 	})
@@ -108,7 +109,7 @@ func TestRunRecordCreate(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
 
-		if err := runRecordCreate("TODO", "Task", "/nonexistent.json", "default"); err == nil {
+		if err := runRecordCreate("TODO", "Task", "/nonexistent.json"); err == nil {
 			t.Fatal("expected error for nonexistent file")
 		}
 	})

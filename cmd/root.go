@@ -1,7 +1,7 @@
 /**
- * [INPUT]: 依赖 github.com/spf13/cobra
- * [OUTPUT]: 对外提供 Execute 函数、rootCmd 根命令
- * [POS]: cmd 模块的入口，挂载 version / configure / app / entity / relation / record / apply / diff / update / schema / integration 子命令
+ * [INPUT]: 依赖 github.com/spf13/cobra、github.com/spf13/pflag
+ * [OUTPUT]: 对外提供 Execute 函数、rootCmd 根命令、全局变量 Profile / ServerURL / DebugMode
+ * [POS]: cmd 模块的入口，挂载 version / configure / app / entity / relation / record / apply / diff / update / schema / integration 子命令；定义全局 --profile / --server-url / --debug 三个 PersistentFlag
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
  */
 
@@ -17,6 +17,10 @@ var DebugMode bool
 
 // ServerURL Meta Server 基础 URL，从命令行读取
 var ServerURL string
+
+// Profile 全局凭证 profile 名称，从命令行读取（--profile）。
+// 默认值与 PersistentFlag 注册一致，确保未经过 cobra 解析时（如单元测试）也可用。
+var Profile = "default"
 
 const defaultMetaServer = "https://dev-make.qtech.cn/api/make"
 
@@ -78,6 +82,7 @@ func Execute(version, buildDate string) error {
 	rootCmd.PersistentFlags().BoolVar(&DebugMode, "debug", false, "enable debug mode to show curl output")
 	_ = rootCmd.PersistentFlags().MarkHidden("debug")
 	rootCmd.PersistentFlags().StringVar(&ServerURL, "server-url", "", "Meta Server base URL (default: config or "+defaultMetaServer+")")
+	rootCmd.PersistentFlags().StringVar(&Profile, "profile", "default", "credentials profile to use")
 	rootCmd.AddCommand(newVersionCmd(version, buildDate))
 	rootCmd.AddCommand(newConfigureCmd())
 	rootCmd.AddCommand(newApplyCmd())

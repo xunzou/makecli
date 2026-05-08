@@ -19,7 +19,7 @@ func TestRunRelationDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRelationDelete("project-has-tasks", "TODO", "default"); err != nil {
+		if err := runRelationDelete("project-has-tasks", "TODO"); err != nil {
 			t.Fatalf("runRelationDelete: %v", err)
 		}
 	})
@@ -28,7 +28,7 @@ func TestRunRelationDelete(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
 
-		if err := runRelationDelete("project-has-tasks", "TODO", "default"); err == nil {
+		if err := runRelationDelete("project-has-tasks", "TODO"); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -40,7 +40,7 @@ func TestRunRelationDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRelationDelete("project-has-tasks", "TODO", "default"); err == nil {
+		if err := runRelationDelete("project-has-tasks", "TODO"); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -49,8 +49,9 @@ func TestRunRelationDelete(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
-		if err := runRelationDelete("project-has-tasks", "TODO", "nonexistent"); err == nil {
+		if err := runRelationDelete("project-has-tasks", "TODO"); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})

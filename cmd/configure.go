@@ -21,49 +21,46 @@ import (
 // ---------------------------------- 命令组 ----------------------------------
 
 func newConfigureCmd() *cobra.Command {
-	var profile string
-
 	cmd := &cobra.Command{
 		Use:          "configure",
 		Short:        "Configure MakeCLI credentials and settings",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runConfigureToken(profile)
+			return runConfigureToken()
 		},
 	}
 
-	cmd.PersistentFlags().StringVar(&profile, "profile", "default", "profile name")
-	cmd.AddCommand(newConfigureTokenCmd(&profile))
-	cmd.AddCommand(newConfigureConfigCmd(&profile))
-	cmd.AddCommand(newConfigureSetCmd(&profile))
-	cmd.AddCommand(newConfigureGetCmd(&profile))
-	cmd.AddCommand(newConfigureVerifyCmd(&profile))
+	cmd.AddCommand(newConfigureTokenCmd())
+	cmd.AddCommand(newConfigureConfigCmd())
+	cmd.AddCommand(newConfigureSetCmd())
+	cmd.AddCommand(newConfigureGetCmd())
+	cmd.AddCommand(newConfigureVerifyCmd())
 
 	return cmd
 }
 
 // ---------------------------------- token 子命令 ----------------------------------
 
-func newConfigureTokenCmd(profile *string) *cobra.Command {
+func newConfigureTokenCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:          "token",
 		Short:        "Configure access token (writes to ~/.make/credentials)",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runConfigureToken(*profile)
+			return runConfigureToken()
 		},
 	}
 }
 
-func runConfigureToken(profile string) error {
+func runConfigureToken() error {
 	creds, err := config.Load()
 	if err != nil {
 		return err
 	}
 
-	current := creds[profile]
+	current := creds[Profile]
 
-	fmt.Printf("Configuring profile [%s]\n", profile)
+	fmt.Printf("Configuring profile [%s]\n", Profile)
 
 	token, err := prompt("MakeCLI Access Token", current.AccessToken)
 	if err != nil {
@@ -76,7 +73,7 @@ func runConfigureToken(profile string) error {
 		current.AccessToken = token
 	}
 
-	creds[profile] = current
+	creds[Profile] = current
 	if err := config.Save(creds); err != nil {
 		return err
 	}
@@ -88,25 +85,25 @@ func runConfigureToken(profile string) error {
 
 // ---------------------------------- config 子命令 ----------------------------------
 
-func newConfigureConfigCmd(profile *string) *cobra.Command {
+func newConfigureConfigCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:          "config",
 		Short:        "Configure custom headers (writes to ~/.make/config)",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runConfigureConfig(*profile)
+			return runConfigureConfig()
 		},
 	}
 }
 
-func runConfigureConfig(profile string) error {
+func runConfigureConfig() error {
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		return err
 	}
 
-	current := cfg[profile]
-	fmt.Printf("Configuring config profile [%s]\n", profile)
+	current := cfg[Profile]
+	fmt.Printf("Configuring config profile [%s]\n", Profile)
 
 	serverURL, err := prompt("server-url", current.ServerURL)
 	if err != nil {
@@ -132,7 +129,7 @@ func runConfigureConfig(profile string) error {
 		current.OperatorID = operatorID
 	}
 
-	cfg[profile] = current
+	cfg[Profile] = current
 	if err := config.SaveConfig(cfg); err != nil {
 		return err
 	}
@@ -155,19 +152,19 @@ func validateConfigKey(key string) error {
 	return fmt.Errorf("unknown config key '%s', valid keys: %s", key, strings.Join(validConfigKeys, ", "))
 }
 
-func newConfigureSetCmd(profile *string) *cobra.Command {
+func newConfigureSetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:          "set <key> <value>",
 		Short:        "Set a config value (writes to ~/.make/config)",
 		Args:         cobra.ExactArgs(2),
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runConfigureSet(*profile, args[0], args[1])
+			return runConfigureSet(args[0], args[1])
 		},
 	}
 }
 
-func runConfigureSet(profile, key, value string) error {
+func runConfigureSet(key, value string) error {
 	if err := validateConfigKey(key); err != nil {
 		return err
 	}
@@ -175,7 +172,7 @@ func runConfigureSet(profile, key, value string) error {
 	if err != nil {
 		return err
 	}
-	p := cfg[profile]
+	p := cfg[Profile]
 	switch key {
 	case "server-url":
 		p.ServerURL = value
@@ -184,25 +181,25 @@ func runConfigureSet(profile, key, value string) error {
 	case "X-Operator-ID":
 		p.OperatorID = value
 	}
-	cfg[profile] = p
+	cfg[Profile] = p
 	return config.SaveConfig(cfg)
 }
 
 // ---------------------------------- get 子命令 ----------------------------------
 
-func newConfigureGetCmd(profile *string) *cobra.Command {
+func newConfigureGetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:          "get <key>",
 		Short:        "Get a config value from ~/.make/config",
 		Args:         cobra.ExactArgs(1),
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runConfigureGet(*profile, args[0])
+			return runConfigureGet(args[0])
 		},
 	}
 }
 
-func runConfigureGet(profile, key string) error {
+func runConfigureGet(key string) error {
 	if err := validateConfigKey(key); err != nil {
 		return err
 	}
@@ -210,7 +207,7 @@ func runConfigureGet(profile, key string) error {
 	if err != nil {
 		return err
 	}
-	p := cfg[profile]
+	p := cfg[Profile]
 	switch key {
 	case "server-url":
 		fmt.Println(p.ServerURL)

@@ -28,7 +28,7 @@ func TestRunDiff(t *testing.T) {
 		ServerURL = "http://unused"
 		dir := writeDiffYAML(t, entityYAML("Task", "myapp", "title", "Make.Field.Text"))
 
-		err := runDiff(dir, "default", outputTable)
+		err := runDiff(dir, outputTable)
 		if err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
@@ -38,9 +38,10 @@ func TestRunDiff(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDiffToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "unknown")
 		dir := writeDiffYAML(t, entityYAML("Task", "myapp", "title", "Make.Field.Text"))
 
-		err := runDiff(dir, "unknown", outputTable)
+		err := runDiff(dir, outputTable)
 		if err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
@@ -54,7 +55,7 @@ func TestRunDiff(t *testing.T) {
 		ServerURL = srv.URL
 		dir := writeDiffYAML(t, entityYAML("Task", "myapp", "title", "Make.Field.Text"))
 
-		err := runDiff(dir, "default", outputTable)
+		err := runDiff(dir, outputTable)
 		if err == nil {
 			t.Fatal("expected error when remote app not found")
 		}
@@ -65,7 +66,7 @@ func TestRunDiff(t *testing.T) {
 		ServerURL = "http://unused"
 		dir := writeDiffYAML(t, entityYAML("Task", "myapp", "title", "Make.Field.Text"))
 
-		err := runDiff(dir, "default", "xml")
+		err := runDiff(dir, "xml")
 		if err == nil {
 			t.Fatal("expected error for invalid output format")
 		}

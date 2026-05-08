@@ -6,17 +6,29 @@
 - key-value 头部信息（File / Name / App 等）用 `fmt.Printf("%-N s %s\n", ...)` 平铺，不进表格
 - 写新输出前先 grep 邻居命令的渲染方式再动手，避免风格漂移
 
+## 全局标志（root PersistentFlags）
+- `--profile string`（default "default"）— 凭证 profile 名，绑定全局变量 `cmd.Profile`（包级 `var Profile = "default"`，单测无需 cobra 解析也能用）
+- `--server-url string` — Meta Server 基础 URL，覆盖 config 与默认值，绑定 `cmd.ServerURL`
+- `--debug`（隐藏）— 输出 curl 调试信息，绑定 `cmd.DebugMode`
+
+三者都不再从 `runXxx` 签名穿越，统一由 `newClientFromProfile()`（零参数）在内部直接读取全局。新增子命令时：
+- 禁止声明本地 `--profile`
+- `runXxx` 函数不要带 profile 参数
+- 客户端构建调用 `newClientFromProfile()` 即可，不传任何参数
+- 单测需要切换 profile 时用 `setProfile(t, "name")`（stdout_test.go），t.Cleanup 自动还原
+
 ## 成员清单
-root.go:             根命令入口，挂载所有子命令（含 schema），对外暴露 Execute(version, date)；定义全局 --debug 标志（隐藏，用于调试，输出 curl 命令）
+root.go:             根命令入口，挂载所有子命令（含 schema），对外暴露 Execute(version, date)；定义全局 PersistentFlag --profile / --server-url / --debug，分别绑定全局变量 Profile / ServerURL / DebugMode
 version.go:          version 子命令，格式化版本输出（参考 GitHub CLI 模式）
 version_test.go:     覆盖 formatVersion / changelogURL 的纯函数测试
-configure.go:        configure 命令组（PersistentFlag: --profile），默认行为等同 token 子命令；子命令: token（交互写 ~/.make/credentials）/ config（交互写 ~/.make/config）/ set（直接写单个 key）/ get（读取单个 key）/ verify（在线验证 token）；validateConfigKey 校验合法 key 集合
+configure.go:        configure 命令组（无本地标志，复用全局 --profile），默认行为等同 token 子命令；子命令: token（交互写 ~/.make/credentials）/ config（交互写 ~/.make/config）/ set（直接写单个 key）/ get（读取单个 key）/ verify（在线验证 token）；validateConfigKey 校验合法 key 集合
 configure_test.go:   覆盖 mask / validateJWT / validateConfigKey 的纯函数测试
 configure_verify.go:     configure verify 子命令，加载 credentials + config，JWT 格式校验后调 ListApps 在线验证 token；输出 verifyResult（profile/valid/token/server_url/tenant_id/operator_id/message）；支持 --output table|json；valid=false 时 exit 1
 configure_verify_test.go: 覆盖 runConfigureVerify 的单元测试（valid token table/json、token not configured、malformed JWT、server 401、config 字段传递、unknown profile），用 httptest 隔离网络
-client.go:           公共 helper，newClientFromProfile 统一「凭证 + 配置 → API 客户端」构建逻辑，注入 debug/headers 选项
+client.go:           公共 helper，newClientFromProfile()（零参数）从全局 Profile/ServerURL/DebugMode 构建 API 客户端，注入 debug/headers 选项
+stdout_test.go:      测试基础设施，提供 captureStdout 劫持 stdout 的辅助函数 + setProfile(t, name) 临时覆盖全局 Profile（t.Cleanup 还原）
 app.go:              app 命令组，挂载 app 相关子命令；提供 loadAppManifestFromFile 共享 helper（从 YAML 加载唯一 Make.App 资源）
-app_create.go:       app create 子命令，通过 newClientFromProfile 构建客户端，调用 CreateApp 创建 App；支持 --profile / --server / --description / --render-name flags 和 -f YAML 文件模式；render-name 默认与 name 一致
+app_create.go:       app create 子命令，通过 newClientFromProfile 构建客户端，调用 CreateApp 创建 App；支持 --description / --render-name 本地 flag 和 -f YAML 文件模式（凭证走全局 --profile）；render-name 默认与 name 一致
 app_create_test.go:  覆盖 runAppCreate / runAppCreateFromFile 的单元测试（成功/无凭证/API错误/未知profile/文件模式），用 httptest 隔离网络
 app_list.go:         app list 子命令，调用 MakeService.ListResources 分页列出 org 下全部 App，tabwriter 对齐输出；支持 --profile / --server / --page / --size / --filter flags；parseFilter 解析 "key=value" 过滤表达式，name 字段自动转 contains 模糊匹配
 app_list_test.go:    覆盖 runAppList / parseFilter 的单元测试（成功/空列表/分页JSON/过滤请求/非法过滤/无凭证/API错误/非法页码），用 httptest 隔离网络
@@ -58,7 +70,6 @@ diff_test.go:        覆盖 diff 子命令核心逻辑的单元测试（computeD
 schema.go:           schema 顶级子命令，调用 MakeService.GetResource 获取指定 App 的聚合 Schema（App + Entities + Relations），JSON 输出；支持 --app（必选）/ --profile
 schema_test.go:      覆盖 runSchema 的单元测试（成功/无凭证/API错误/未知profile），用 httptest 隔离网络
 output.go:           list 命令通用输出辅助（table|json 格式校验 + JSON 编码），被 app list / entity list / relation list / record list / record get 复用
-stdout_test.go:      测试基础设施，提供 captureStdout 辅助函数劫持 os.Stdout 捕获输出，被各子命令测试复用
 update.go:           update 子命令，从 GitHub Releases 自更新二进制；直接 import internal/build 读取版本，委托 internal/update 执行检查和替换
 integration.go:           integration 命令组，挂载 ocr 子命令；预留扩展点供未来其它 integration（translate / asr / embed 等）
 integration_ocr.go:       integration ocr 子命令，校验文件后缀（.pdf/.ofd/.png/.jpg/.jpeg）后通过 newClientFromProfile 上传，调用 api.OCR；renderOCRTable 风格对齐 entity list <name>：顶部 File/Bills/Took 头部 + 每张票一个 tablewriter LABEL/VALUE 边框表格，按 spec sample 解析 result.pages[].bills[].items[]（过滤空值），断言失败回退 JSON；支持 -f|--file（必选）/ --profile / --output（table|json）/ --business-id / --verify-vat（默认 true，仅 Changed 时显式发送）/ --coord-restore-original / --pages / --crop-complete / --crop-value / --merge-elec / --return-ppi

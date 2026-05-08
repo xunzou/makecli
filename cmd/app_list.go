@@ -17,7 +17,6 @@ import (
 )
 
 func newAppListCmd() *cobra.Command {
-	var profile string
 	var page int
 	var size int
 	var output string
@@ -28,11 +27,10 @@ func newAppListCmd() *cobra.Command {
 		Short:        "List all apps",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runAppList(profile, page, size, output, filter)
+			return runAppList(page, size, output, filter)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().IntVar(&page, "page", 1, "page number to fetch (starts from 1)")
 	cmd.Flags().IntVar(&size, "size", 20, "number of apps per page")
 	cmd.Flags().StringVar(&output, "output", outputTable, "output format (table|json)")
@@ -64,7 +62,7 @@ func parseFilter(expr string) ([]map[string]any, error) {
 	return filters, nil
 }
 
-func runAppList(profile string, page, size int, output, filterExpr string) error {
+func runAppList(page, size int, output, filterExpr string) error {
 	if err := validateOutputFormat(output); err != nil {
 		return err
 	}
@@ -80,7 +78,7 @@ func runAppList(profile string, page, size int, output, filterExpr string) error
 		return err
 	}
 
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

@@ -41,7 +41,7 @@ func TestRunRelationList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRelationList("TODO", "", "default", 1, 20, outputTable, ""); err != nil {
+		if err := runRelationList("TODO", "", 1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runRelationList: %v", err)
 		}
 	})
@@ -59,7 +59,7 @@ func TestRunRelationList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRelationList("TODO", "", "default", 1, 20, outputTable, ""); err != nil {
+		if err := runRelationList("TODO", "", 1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runRelationList empty: %v", err)
 		}
 	})
@@ -109,7 +109,7 @@ func TestRunRelationList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRelationList("TODO", "", "default", 1, 20, outputTable, "name=project"); err != nil {
+		if err := runRelationList("TODO", "", 1, 20, outputTable, "name=project"); err != nil {
 			t.Fatalf("runRelationList with filter: %v", err)
 		}
 	})
@@ -137,7 +137,7 @@ func TestRunRelationList(t *testing.T) {
 		ServerURL = srv.URL
 
 		output := captureStdout(t, func() {
-			if err := runRelationList("TODO", "", "default", 1, 20, outputJSON, ""); err != nil {
+			if err := runRelationList("TODO", "", 1, 20, outputJSON, ""); err != nil {
 				t.Fatalf("runRelationList json: %v", err)
 			}
 		})
@@ -173,7 +173,7 @@ func TestRunRelationList(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			if err := runRelationList("TODO", "project-has-tasks", "default", 1, 20, outputTable, ""); err != nil {
+			if err := runRelationList("TODO", "project-has-tasks", 1, 20, outputTable, ""); err != nil {
 				t.Fatalf("runRelationList detail: %v", err)
 			}
 		})
@@ -209,7 +209,7 @@ func TestRunRelationList(t *testing.T) {
 		ServerURL = srv.URL
 
 		output := captureStdout(t, func() {
-			if err := runRelationList("TODO", "project-has-tasks", "default", 1, 20, outputJSON, ""); err != nil {
+			if err := runRelationList("TODO", "project-has-tasks", 1, 20, outputJSON, ""); err != nil {
 				t.Fatalf("runRelationList json detail: %v", err)
 			}
 		})
@@ -222,7 +222,7 @@ func TestRunRelationList(t *testing.T) {
 	t.Run("fails without credentials", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runRelationList("TODO", "", "default", 1, 20, outputTable, ""); err == nil {
+		if err := runRelationList("TODO", "", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -231,7 +231,8 @@ func TestRunRelationList(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
-		if err := runRelationList("TODO", "", "nonexistent", 1, 20, outputTable, ""); err == nil {
+		setProfile(t, "nonexistent")
+		if err := runRelationList("TODO", "", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -245,7 +246,7 @@ func TestRunRelationList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRelationList("TODO", "", "default", 1, 20, outputTable, ""); err == nil {
+		if err := runRelationList("TODO", "", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -259,25 +260,25 @@ func TestRunRelationList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRelationList("TODO", "不存在", "default", 1, 20, outputTable, ""); err == nil {
+		if err := runRelationList("TODO", "不存在", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error on get API failure")
 		}
 	})
 
 	t.Run("fails when page is less than 1", func(t *testing.T) {
-		if err := runRelationList("TODO", "", "default", 0, 20, outputTable, ""); err == nil {
+		if err := runRelationList("TODO", "", 0, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for invalid page")
 		}
 	})
 
 	t.Run("fails when size is less than 1", func(t *testing.T) {
-		if err := runRelationList("TODO", "", "default", 1, 0, outputTable, ""); err == nil {
+		if err := runRelationList("TODO", "", 1, 0, outputTable, ""); err == nil {
 			t.Fatal("expected error for invalid size")
 		}
 	})
 
 	t.Run("fails on unsupported output format", func(t *testing.T) {
-		if err := runRelationList("TODO", "", "default", 1, 20, "xml", ""); err == nil {
+		if err := runRelationList("TODO", "", 1, 20, "xml", ""); err == nil {
 			t.Fatal("expected error for unsupported output format")
 		}
 	})

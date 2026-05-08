@@ -19,7 +19,7 @@ func TestRunEntityDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityDelete("Project", "TODO", "default"); err != nil {
+		if err := runEntityDelete("Project", "TODO"); err != nil {
 			t.Fatalf("runEntityDelete: %v", err)
 		}
 	})
@@ -28,7 +28,7 @@ func TestRunEntityDelete(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
 
-		if err := runEntityDelete("Project", "TODO", "default"); err == nil {
+		if err := runEntityDelete("Project", "TODO"); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -40,7 +40,7 @@ func TestRunEntityDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityDelete("Project", "TODO", "default"); err == nil {
+		if err := runEntityDelete("Project", "TODO"); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -49,8 +49,9 @@ func TestRunEntityDelete(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
-		if err := runEntityDelete("Project", "TODO", "nonexistent"); err == nil {
+		if err := runEntityDelete("Project", "TODO"); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})

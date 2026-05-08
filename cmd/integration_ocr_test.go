@@ -73,7 +73,7 @@ func TestRunIntegrationOCR(t *testing.T) {
 		}
 
 		out := captureStdout(t, func() {
-			if err := runIntegrationOCR(file, "default", outputTable, api.OCROptions{}); err != nil {
+			if err := runIntegrationOCR(file, outputTable, api.OCROptions{}); err != nil {
 				t.Fatalf("runIntegrationOCR: %v", err)
 			}
 		})
@@ -111,7 +111,7 @@ func TestRunIntegrationOCR(t *testing.T) {
 		}
 
 		out := captureStdout(t, func() {
-			if err := runIntegrationOCR(file, "default", outputJSON, api.OCROptions{}); err != nil {
+			if err := runIntegrationOCR(file, outputJSON, api.OCROptions{}); err != nil {
 				t.Fatalf("runIntegrationOCR json: %v", err)
 			}
 		})
@@ -123,13 +123,13 @@ func TestRunIntegrationOCR(t *testing.T) {
 	t.Run("rejects unsupported extension", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runIntegrationOCR("/tmp/foo.txt", "default", outputTable, api.OCROptions{}); err == nil {
+		if err := runIntegrationOCR("/tmp/foo.txt", outputTable, api.OCROptions{}); err == nil {
 			t.Fatal("expected error for unsupported extension")
 		}
 	})
 
 	t.Run("rejects unsupported output format", func(t *testing.T) {
-		if err := runIntegrationOCR("/tmp/foo.pdf", "default", "xml", api.OCROptions{}); err == nil {
+		if err := runIntegrationOCR("/tmp/foo.pdf", "xml", api.OCROptions{}); err == nil {
 			t.Fatal("expected error for unsupported output format")
 		}
 	})
@@ -137,7 +137,7 @@ func TestRunIntegrationOCR(t *testing.T) {
 	t.Run("rejects missing file", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runIntegrationOCR("/tmp/does-not-exist.pdf", "default", outputTable, api.OCROptions{}); err == nil {
+		if err := runIntegrationOCR("/tmp/does-not-exist.pdf", outputTable, api.OCROptions{}); err == nil {
 			t.Fatal("expected error for missing file")
 		}
 	})
@@ -150,7 +150,7 @@ func TestRunIntegrationOCR(t *testing.T) {
 		if err := os.WriteFile(file, []byte("x"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if err := runIntegrationOCR(file, "default", outputTable, api.OCROptions{}); err == nil {
+		if err := runIntegrationOCR(file, outputTable, api.OCROptions{}); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -159,12 +159,13 @@ func TestRunIntegrationOCR(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 		dir := t.TempDir()
 		file := filepath.Join(dir, "demo.jpg")
 		if err := os.WriteFile(file, []byte("x"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if err := runIntegrationOCR(file, "nonexistent", outputTable, api.OCROptions{}); err == nil {
+		if err := runIntegrationOCR(file, outputTable, api.OCROptions{}); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -184,7 +185,7 @@ func TestRunIntegrationOCR(t *testing.T) {
 		if err := os.WriteFile(file, []byte("x"), 0o644); err != nil {
 			t.Fatal(err)
 		}
-		if err := runIntegrationOCR(file, "default", outputTable, api.OCROptions{}); err == nil {
+		if err := runIntegrationOCR(file, outputTable, api.OCROptions{}); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})

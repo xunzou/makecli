@@ -18,7 +18,6 @@ import (
 )
 
 func newEntityCreateCmd() *cobra.Command {
-	var profile string
 	var jsonFile string
 
 	cmd := &cobra.Command{
@@ -28,17 +27,16 @@ func newEntityCreateCmd() *cobra.Command {
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
-			return runEntityCreate(args[0], app, jsonFile, profile)
+			return runEntityCreate(args[0], app, jsonFile)
 		},
 	}
 
 	cmd.Flags().StringVar(&jsonFile, "json", "", "path to JSON file containing fields array")
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	return cmd
 }
 
-func runEntityCreate(name, app, jsonFile, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runEntityCreate(name, app, jsonFile string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

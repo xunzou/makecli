@@ -38,7 +38,7 @@ func TestRunRecordDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}, "default"); err != nil {
+		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}); err != nil {
 			t.Fatalf("runRecordDelete: %v", err)
 		}
 	})
@@ -54,7 +54,7 @@ func TestRunRecordDelete(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			if err := runRecordDelete("myapp", "tasks", []string{"rec_001", "rec_002"}, "default"); err != nil {
+			if err := runRecordDelete("myapp", "tasks", []string{"rec_001", "rec_002"}); err != nil {
 				t.Fatalf("runRecordDelete: %v", err)
 			}
 		})
@@ -76,7 +76,7 @@ func TestRunRecordDelete(t *testing.T) {
 
 		var err error
 		out := captureStdout(t, func() {
-			err = runRecordDelete("myapp", "tasks", []string{"rec_001", "rec_002"}, "default")
+			err = runRecordDelete("myapp", "tasks", []string{"rec_001", "rec_002"})
 		})
 
 		if err == nil {
@@ -97,7 +97,7 @@ func TestRunRecordDelete(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
 
-		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}, "default"); err == nil {
+		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -109,7 +109,7 @@ func TestRunRecordDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}, "default"); err == nil {
+		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -118,8 +118,9 @@ func TestRunRecordDelete(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
-		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}, "nonexistent"); err == nil {
+		if err := runRecordDelete("myapp", "tasks", []string{"rec_001"}); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})

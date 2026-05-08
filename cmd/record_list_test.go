@@ -32,7 +32,7 @@ func TestRunRecordList(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			if err := runRecordList("TODO", "User", "default", 1, 20, outputTable, "", ""); err != nil {
+			if err := runRecordList("TODO", "User", 1, 20, outputTable, "", ""); err != nil {
 				t.Fatalf("runRecordList: %v", err)
 			}
 		})
@@ -61,7 +61,7 @@ func TestRunRecordList(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			if err := runRecordList("TODO", "User", "default", 1, 20, outputJSON, "", ""); err != nil {
+			if err := runRecordList("TODO", "User", 1, 20, outputJSON, "", ""); err != nil {
 				t.Fatalf("runRecordList json: %v", err)
 			}
 		})
@@ -88,7 +88,7 @@ func TestRunRecordList(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			if err := runRecordList("TODO", "User", "default", 1, 20, outputTable, "", ""); err != nil {
+			if err := runRecordList("TODO", "User", 1, 20, outputTable, "", ""); err != nil {
 				t.Fatalf("runRecordList empty: %v", err)
 			}
 		})
@@ -101,7 +101,7 @@ func TestRunRecordList(t *testing.T) {
 	t.Run("fails without credentials", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runRecordList("TODO", "User", "default", 1, 20, outputTable, "", ""); err == nil {
+		if err := runRecordList("TODO", "User", 1, 20, outputTable, "", ""); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -115,7 +115,7 @@ func TestRunRecordList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRecordList("TODO", "User", "default", 1, 20, outputTable, "", ""); err == nil {
+		if err := runRecordList("TODO", "User", 1, 20, outputTable, "", ""); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -124,25 +124,26 @@ func TestRunRecordList(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
-		if err := runRecordList("TODO", "User", "nonexistent", 1, 20, outputTable, "", ""); err == nil {
+		setProfile(t, "nonexistent")
+		if err := runRecordList("TODO", "User", 1, 20, outputTable, "", ""); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
 
 	t.Run("fails when page is less than 1", func(t *testing.T) {
-		if err := runRecordList("TODO", "User", "default", 0, 20, outputTable, "", ""); err == nil {
+		if err := runRecordList("TODO", "User", 0, 20, outputTable, "", ""); err == nil {
 			t.Fatal("expected error for invalid page")
 		}
 	})
 
 	t.Run("fails when size is less than 1", func(t *testing.T) {
-		if err := runRecordList("TODO", "User", "default", 1, 0, outputTable, "", ""); err == nil {
+		if err := runRecordList("TODO", "User", 1, 0, outputTable, "", ""); err == nil {
 			t.Fatal("expected error for invalid size")
 		}
 	})
 
 	t.Run("fails on unsupported output format", func(t *testing.T) {
-		if err := runRecordList("TODO", "User", "default", 1, 20, "xml", "", ""); err == nil {
+		if err := runRecordList("TODO", "User", 1, 20, "xml", "", ""); err == nil {
 			t.Fatal("expected error for unsupported output format")
 		}
 	})
@@ -151,7 +152,7 @@ func TestRunRecordList(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
-		if err := runRecordList("TODO", "User", "default", 1, 20, outputTable, "", "bad"); err == nil {
+		if err := runRecordList("TODO", "User", 1, 20, outputTable, "", "bad"); err == nil {
 			t.Fatal("expected error for invalid sort spec")
 		}
 	})

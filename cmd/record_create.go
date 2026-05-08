@@ -16,7 +16,6 @@ import (
 )
 
 func newRecordCreateCmd() *cobra.Command {
-	var profile string
 	var jsonFile string
 
 	cmd := &cobra.Command{
@@ -27,18 +26,17 @@ func newRecordCreateCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
 			entity, _ := cmd.Parent().Flags().GetString("entity")
-			return runRecordCreate(app, entity, jsonFile, profile)
+			return runRecordCreate(app, entity, jsonFile)
 		},
 	}
 
 	cmd.Flags().StringVar(&jsonFile, "json", "", "path to JSON file containing record data (required)")
 	_ = cmd.MarkFlagRequired("json")
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	return cmd
 }
 
-func runRecordCreate(app, entity, jsonFile, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runRecordCreate(app, entity, jsonFile string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

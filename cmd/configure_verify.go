@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newConfigureVerifyCmd(profile *string) *cobra.Command {
+func newConfigureVerifyCmd() *cobra.Command {
 	var output string
 
 	cmd := &cobra.Command{
@@ -24,7 +24,7 @@ func newConfigureVerifyCmd(profile *string) *cobra.Command {
 		Short:        "Verify that the current profile has a valid token",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			r, err := runConfigureVerify(*profile, output)
+			r, err := runConfigureVerify(output)
 			if err != nil {
 				return err
 			}
@@ -50,12 +50,12 @@ type verifyResult struct {
 	Message    string `json:"message"`
 }
 
-func runConfigureVerify(profile, output string) (*verifyResult, error) {
+func runConfigureVerify(output string) (*verifyResult, error) {
 	if err := validateOutputFormat(output); err != nil {
 		return nil, err
 	}
 
-	result := verifyResult{Profile: profile}
+	result := verifyResult{Profile: Profile}
 
 	// 加载凭证
 	creds, err := config.Load()
@@ -68,14 +68,14 @@ func runConfigureVerify(profile, output string) (*verifyResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	if cp, ok := cfg[profile]; ok {
+	if cp, ok := cfg[Profile]; ok {
 		result.ServerURL = cp.ServerURL
 		result.TenantID = cp.XTenantID
 		result.OperatorID = cp.OperatorID
 	}
 
 	// 检查 token 是否存在
-	p, ok := creds[profile]
+	p, ok := creds[Profile]
 	if !ok || p.AccessToken == "" {
 		result.Message = "token not configured"
 		outputVerifyResult(result, output)

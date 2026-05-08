@@ -1,6 +1,6 @@
 /**
- * [INPUT]: 依赖 os、bytes、io、testing
- * [OUTPUT]: 对外提供 captureStdout 测试辅助函数，劫持 os.Stdout 捕获输出
+ * [INPUT]: 依赖 os、bytes、io、testing；对全局变量 Profile 的引用
+ * [OUTPUT]: 对外提供 captureStdout / setProfile 两个测试辅助函数
  * [POS]: cmd 模块的测试基础设施，被各子命令测试文件复用
  * [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
  */
@@ -40,4 +40,13 @@ func captureStdout(t *testing.T, fn func()) string {
 	_ = reader.Close()
 
 	return output
+}
+
+// setProfile 在测试期间临时覆盖全局 Profile，结束自动还原。
+// 替代旧的「runXxx(... "nonexistent" ...)」风格——profile 不再走参数。
+func setProfile(t *testing.T, name string) {
+	t.Helper()
+	old := Profile
+	Profile = name
+	t.Cleanup(func() { Profile = old })
 }

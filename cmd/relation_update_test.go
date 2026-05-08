@@ -26,7 +26,7 @@ func TestRunRelationUpdate(t *testing.T) {
 			"to":   map[string]any{"entity": "任务", "cardinality": "many"},
 		})
 
-		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile, "default"); err != nil {
+		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile); err != nil {
 			t.Fatalf("runRelationUpdate: %v", err)
 		}
 	})
@@ -40,7 +40,7 @@ func TestRunRelationUpdate(t *testing.T) {
 			"to":   map[string]any{"entity": "任务", "cardinality": "many"},
 		})
 
-		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile, "default"); err == nil {
+		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -57,7 +57,7 @@ func TestRunRelationUpdate(t *testing.T) {
 			"to":   map[string]any{"entity": "任务", "cardinality": "many"},
 		})
 
-		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile, "default"); err == nil {
+		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -66,13 +66,14 @@ func TestRunRelationUpdate(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
 		jsonFile := writeRelationJSON(t, map[string]any{
 			"from": map[string]any{"entity": "项目", "cardinality": "one"},
 			"to":   map[string]any{"entity": "任务", "cardinality": "many"},
 		})
 
-		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile, "nonexistent"); err == nil {
+		if err := runRelationUpdate("project-has-tasks", "TODO", jsonFile); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -85,7 +86,7 @@ func TestRunRelationUpdate(t *testing.T) {
 		bad := filepath.Join(t.TempDir(), "bad.json")
 		_ = os.WriteFile(bad, []byte("not json"), 0644)
 
-		if err := runRelationUpdate("project-has-tasks", "TODO", bad, "default"); err == nil {
+		if err := runRelationUpdate("project-has-tasks", "TODO", bad); err == nil {
 			t.Fatal("expected error for invalid JSON")
 		}
 	})

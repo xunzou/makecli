@@ -17,7 +17,6 @@ import (
 )
 
 func newRelationCreateCmd() *cobra.Command {
-	var profile string
 	var jsonFile string
 
 	cmd := &cobra.Command{
@@ -27,18 +26,17 @@ func newRelationCreateCmd() *cobra.Command {
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
-			return runRelationCreate(args[0], app, jsonFile, profile)
+			return runRelationCreate(args[0], app, jsonFile)
 		},
 	}
 
 	cmd.Flags().StringVar(&jsonFile, "json", "", "path to JSON file containing relation properties (required)")
 	_ = cmd.MarkFlagRequired("json")
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	return cmd
 }
 
-func runRelationCreate(name, app, jsonFile, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runRelationCreate(name, app, jsonFile string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

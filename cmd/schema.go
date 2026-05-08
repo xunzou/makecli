@@ -13,25 +13,23 @@ import (
 
 func newSchemaCmd() *cobra.Command {
 	var app string
-	var profile string
 
 	cmd := &cobra.Command{
 		Use:          "schema",
 		Short:        "Get aggregated schema for an app (app + entities + relations)",
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSchema(app, profile)
+			return runSchema(app)
 		},
 	}
 
 	cmd.Flags().StringVar(&app, "app", "", "app name (required)")
 	_ = cmd.MarkFlagRequired("app")
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	return cmd
 }
 
-func runSchema(app, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runSchema(app string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

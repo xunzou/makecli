@@ -30,7 +30,6 @@ var ocrAllowedExtensions = map[string]bool{
 func newIntegrationOCRCmd() *cobra.Command {
 	var (
 		file       string
-		profile    string
 		output     string
 		businessID int64
 		verifyVAT  bool
@@ -65,12 +64,11 @@ func newIntegrationOCRCmd() *cobra.Command {
 				MergeDigitalElecInvoice: mergeDigitalElecInvoice,
 				ReturnPPI:               returnPPI,
 			}
-			return runIntegrationOCR(file, profile, output, opts)
+			return runIntegrationOCR(file, output, opts)
 		},
 	}
 
 	cmd.Flags().StringVarP(&file, "file", "f", "", "path to PDF/OFD/PNG/JPG file (required)")
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().StringVar(&output, "output", outputTable, "output format (table|json)")
 	cmd.Flags().Int64Var(&businessID, "business-id", 0, "business document ID (multipart business_id)")
 	cmd.Flags().BoolVar(&verifyVAT, "verify-vat", true, "enable invoice authenticity verification (server default: true)")
@@ -84,7 +82,7 @@ func newIntegrationOCRCmd() *cobra.Command {
 	return cmd
 }
 
-func runIntegrationOCR(file, profile, output string, opts api.OCROptions) error {
+func runIntegrationOCR(file, output string, opts api.OCROptions) error {
 	if err := validateOutputFormat(output); err != nil {
 		return err
 	}
@@ -99,7 +97,7 @@ func runIntegrationOCR(file, profile, output string, opts api.OCROptions) error 
 	}
 	defer func() { _ = f.Close() }()
 
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

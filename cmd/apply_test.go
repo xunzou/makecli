@@ -38,7 +38,7 @@ properties:
   code: custom_code
 `)
 
-		if err := runAppApply(yamlFile, "default"); err != nil {
+		if err := runAppApply(yamlFile); err != nil {
 			t.Fatalf("runAppApply: %v", err)
 		}
 	})
@@ -72,7 +72,7 @@ properties:
   code: app2
 `)
 
-		if err := runAppApply(yamlFile, "default"); err != nil {
+		if err := runAppApply(yamlFile); err != nil {
 			t.Fatalf("runAppApply multi-doc: %v", err)
 		}
 		// 每个 App: 1x GetApp + 1x CreateApp = 2 calls，2 个 App = 4 calls
@@ -116,7 +116,7 @@ properties:
       properties: {}
 `)
 
-		if err := runAppApply(testDir, "default"); err != nil {
+		if err := runAppApply(testDir); err != nil {
 			t.Fatalf("runAppApply dir: %v", err)
 		}
 		// 1x GetApp + 1x CreateApp + 1x GetEntity + 1x CreateEntity = 4 calls
@@ -152,7 +152,7 @@ properties:
     cardinality: many
 `)
 
-		if err := runAppApply(yamlFile, "default"); err != nil {
+		if err := runAppApply(yamlFile); err != nil {
 			t.Fatalf("runAppApply relation: %v", err)
 		}
 		// 1x GetRelation + 1x CreateRelation = 2 calls
@@ -193,7 +193,7 @@ properties:
     cardinality: many
 `)
 
-		if err := runAppApply(yamlFile, "default"); err != nil {
+		if err := runAppApply(yamlFile); err != nil {
 			t.Fatalf("runAppApply update relation: %v", err)
 		}
 		// 1x GetRelation + 1x UpdateRelation = 2 calls
@@ -223,7 +223,7 @@ properties:
     cardinality: many
 `)
 
-		if err := runAppApply(yamlFile, "default"); err == nil {
+		if err := runAppApply(yamlFile); err == nil {
 			t.Fatal("expected error for missing app field")
 		}
 	})
@@ -247,7 +247,7 @@ properties:
     cardinality: many
 `)
 
-		if err := runAppApply(yamlFile, "default"); err == nil {
+		if err := runAppApply(yamlFile); err == nil {
 			t.Fatal("expected error for missing from field")
 		}
 	})
@@ -299,7 +299,7 @@ properties:
     cardinality: many
 `)
 
-		if err := runAppApply(testDir, "default"); err != nil {
+		if err := runAppApply(testDir); err != nil {
 			t.Fatalf("runAppApply dir with relation: %v", err)
 		}
 		// 2(App) + 2(Entity) + 2(Relation) = 6 calls
@@ -322,7 +322,7 @@ properties:
   code: test
 `)
 
-		if err := runAppApply(yamlFile, "default"); err == nil {
+		if err := runAppApply(yamlFile); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -332,6 +332,7 @@ properties:
 		testDir := t.TempDir()
 		saveDefaultTokenForApply(t)
 		ServerURL = "http://unused"
+		setProfile(t, "unknown")
 		yamlFile := writeYAMLFileForApply(t, testDir, "app.yaml", `name: test
 type: Make.App
 meta:
@@ -340,7 +341,7 @@ properties:
   code: test
 `)
 
-		if err := runAppApply(yamlFile, "unknown"); err == nil {
+		if err := runAppApply(yamlFile); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -361,7 +362,7 @@ properties:
   code: test
 `)
 
-		if err := runAppApply(yamlFile, "default"); err == nil {
+		if err := runAppApply(yamlFile); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -382,7 +383,7 @@ properties:
   fields: []
 `)
 
-		if err := runAppApply(yamlFile, "default"); err == nil {
+		if err := runAppApply(yamlFile); err == nil {
 			t.Fatal("expected error for missing app field")
 		}
 	})
@@ -403,7 +404,7 @@ properties:
   code: todo
 `)
 
-		err := runAppApply(yamlFile, "default")
+		err := runAppApply(yamlFile)
 		if err == nil {
 			t.Fatal("expected error for unknown resource type")
 		}
@@ -422,7 +423,7 @@ properties:
 
 		yamlFile := writeYAMLFileForApply(t, testDir, "empty.yaml", "")
 
-		err := runAppApply(yamlFile, "default")
+		err := runAppApply(yamlFile)
 		if err == nil {
 			t.Fatal("expected error for empty YAML file")
 		}
@@ -440,7 +441,7 @@ properties:
 		bad := filepath.Join(testDir, "bad.yaml")
 		_ = os.WriteFile(bad, []byte("invalid: yaml: ["), 0644)
 
-		if err := runAppApply(bad, "default"); err == nil {
+		if err := runAppApply(bad); err == nil {
 			t.Fatal("expected error for invalid YAML")
 		}
 	})
@@ -453,7 +454,7 @@ func TestRunAppApplyFailsWithoutRecognizedYAMLFiles(t *testing.T) {
 	testDir := t.TempDir()
 	writeYAMLFileForApply(t, testDir, "app.json", `{"name":"app1"}`)
 
-	err := runAppApply(testDir, "default")
+	err := runAppApply(testDir)
 	if err == nil {
 		t.Fatal("expected error for directory without yaml files")
 	}

@@ -51,7 +51,7 @@ func TestRunAppList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppList("default", 1, 20, outputTable, ""); err != nil {
+		if err := runAppList(1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runAppList: %v", err)
 		}
 	})
@@ -69,7 +69,7 @@ func TestRunAppList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppList("default", 1, 20, outputTable, ""); err != nil {
+		if err := runAppList(1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runAppList: %v", err)
 		}
 	})
@@ -92,7 +92,7 @@ func TestRunAppList(t *testing.T) {
 		ServerURL = srv.URL
 
 		output := captureStdout(t, func() {
-			if err := runAppList("default", 2, 20, outputJSON, ""); err != nil {
+			if err := runAppList(2, 20, outputJSON, ""); err != nil {
 				t.Fatalf("runAppList json: %v", err)
 			}
 		})
@@ -114,7 +114,7 @@ func TestRunAppList(t *testing.T) {
 	t.Run("fails without credentials", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runAppList("default", 1, 20, outputTable, ""); err == nil {
+		if err := runAppList(1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -128,25 +128,25 @@ func TestRunAppList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppList("default", 1, 20, outputTable, ""); err == nil {
+		if err := runAppList(1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
 
 	t.Run("fails when page is less than 1", func(t *testing.T) {
-		if err := runAppList("default", 0, 20, outputTable, ""); err == nil {
+		if err := runAppList(0, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for invalid page")
 		}
 	})
 
 	t.Run("fails when size is less than 1", func(t *testing.T) {
-		if err := runAppList("default", 1, 0, outputTable, ""); err == nil {
+		if err := runAppList(1, 0, outputTable, ""); err == nil {
 			t.Fatal("expected error for invalid size")
 		}
 	})
 
 	t.Run("fails on unsupported output format", func(t *testing.T) {
-		if err := runAppList("default", 1, 20, "xml", ""); err == nil {
+		if err := runAppList(1, 20, "xml", ""); err == nil {
 			t.Fatal("expected error for unsupported output format")
 		}
 	})
@@ -185,19 +185,19 @@ func TestRunAppList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppList("default", 1, 20, outputTable, "name=todo,renderName=todo"); err != nil {
+		if err := runAppList(1, 20, outputTable, "name=todo,renderName=todo"); err != nil {
 			t.Fatalf("runAppList with filter: %v", err)
 		}
 	})
 
 	t.Run("fails on invalid filter expression", func(t *testing.T) {
-		if err := runAppList("default", 1, 20, outputTable, "badfilter"); err == nil {
+		if err := runAppList(1, 20, outputTable, "badfilter"); err == nil {
 			t.Fatal("expected error for invalid filter")
 		}
 	})
 
 	t.Run("fails on unsupported filter field", func(t *testing.T) {
-		if err := runAppList("default", 1, 20, outputTable, "status=active"); err == nil {
+		if err := runAppList(1, 20, outputTable, "status=active"); err == nil {
 			t.Fatal("expected error for unsupported filter field")
 		}
 	})

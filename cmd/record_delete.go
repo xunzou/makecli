@@ -14,8 +14,6 @@ import (
 )
 
 func newRecordDeleteCmd() *cobra.Command {
-	var profile string
-
 	cmd := &cobra.Command{
 		Use:          "delete <record-id> [record-id...]",
 		Short:        "Delete one or more records",
@@ -24,16 +22,15 @@ func newRecordDeleteCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
 			entity, _ := cmd.Parent().Flags().GetString("entity")
-			return runRecordDelete(app, entity, args, profile)
+			return runRecordDelete(app, entity, args)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	return cmd
 }
 
-func runRecordDelete(app, entity string, recordIDs []string, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runRecordDelete(app, entity string, recordIDs []string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

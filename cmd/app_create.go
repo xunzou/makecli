@@ -14,7 +14,6 @@ import (
 )
 
 func newAppCreateCmd() *cobra.Command {
-	var profile string
 	var description string
 	var renderName string
 	var file string
@@ -30,23 +29,22 @@ func newAppCreateCmd() *cobra.Command {
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file != "" {
-				return runAppCreateFromFile(file, profile)
+				return runAppCreateFromFile(file)
 			}
 			if len(args) == 0 {
 				return fmt.Errorf("requires app name or -f flag")
 			}
-			return runAppCreate(args[0], description, renderName, profile)
+			return runAppCreate(args[0], description, renderName)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().StringVar(&description, "description", "", "app description")
 	cmd.Flags().StringVar(&renderName, "render-name", "", "app display name (defaults to name)")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "path to YAML file containing Make.App resource")
 	return cmd
 }
 
-func runAppCreateFromFile(path, profile string) error {
+func runAppCreateFromFile(path string) error {
 	manifest, err := loadAppManifestFromFile(path)
 	if err != nil {
 		return err
@@ -56,7 +54,7 @@ func runAppCreateFromFile(path, profile string) error {
 		return err
 	}
 
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}
@@ -79,12 +77,12 @@ func runAppCreateFromFile(path, profile string) error {
 	return nil
 }
 
-func runAppCreate(name, description, renderName, profile string) error {
+func runAppCreate(name, description, renderName string) error {
 	if err := validateAppName(name); err != nil {
 		return err
 	}
 
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

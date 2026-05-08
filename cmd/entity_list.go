@@ -17,7 +17,6 @@ import (
 )
 
 func newEntityListCmd() *cobra.Command {
-	var profile string
 	var page int
 	var size int
 	var output string
@@ -34,11 +33,10 @@ func newEntityListCmd() *cobra.Command {
 			if len(args) == 1 {
 				entityName = args[0]
 			}
-			return runEntityList(app, entityName, profile, page, size, output, filter)
+			return runEntityList(app, entityName, page, size, output, filter)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().IntVar(&page, "page", 1, "page number to fetch (starts from 1)")
 	cmd.Flags().IntVar(&size, "size", 20, "number of entities per page")
 	cmd.Flags().StringVar(&output, "output", outputTable, "output format (table|json)")
@@ -46,7 +44,7 @@ func newEntityListCmd() *cobra.Command {
 	return cmd
 }
 
-func runEntityList(app, entityName, profile string, page, size int, output, filterExpr string) error {
+func runEntityList(app, entityName string, page, size int, output, filterExpr string) error {
 	if err := validateOutputFormat(output); err != nil {
 		return err
 	}
@@ -62,7 +60,7 @@ func runEntityList(app, entityName, profile string, page, size int, output, filt
 		return err
 	}
 
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

@@ -20,7 +20,7 @@ func TestRunAppDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppDelete("myapp", "default"); err != nil {
+		if err := runAppDelete("myapp"); err != nil {
 			t.Fatalf("runAppDelete: %v", err)
 		}
 	})
@@ -28,7 +28,7 @@ func TestRunAppDelete(t *testing.T) {
 	t.Run("fails without credentials", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runAppDelete("myapp", "default"); err == nil {
+		if err := runAppDelete("myapp"); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -40,7 +40,7 @@ func TestRunAppDelete(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppDelete("myapp", "default"); err == nil {
+		if err := runAppDelete("myapp"); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -49,8 +49,9 @@ func TestRunAppDelete(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
-		if err := runAppDelete("myapp", "nonexistent"); err == nil {
+		if err := runAppDelete("myapp"); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -67,7 +68,7 @@ func TestRunAppDeleteFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "app.yaml")
 		writeTestFile(t, f, []byte("name: fileapp\ntype: Make.App\n"))
 
-		if err := runAppDeleteFromFile(f, "default"); err != nil {
+		if err := runAppDeleteFromFile(f); err != nil {
 			t.Fatalf("runAppDeleteFromFile: %v", err)
 		}
 	})
@@ -76,7 +77,7 @@ func TestRunAppDeleteFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "app.txt")
 		writeTestFile(t, f, []byte("name: foo"))
 
-		if err := runAppDeleteFromFile(f, "default"); err == nil {
+		if err := runAppDeleteFromFile(f); err == nil {
 			t.Fatal("expected error for non-yaml file")
 		}
 	})
@@ -85,7 +86,7 @@ func TestRunAppDeleteFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "entity.yaml")
 		writeTestFile(t, f, []byte("name: foo\ntype: Make.Entity\napp: bar\n"))
 
-		if err := runAppDeleteFromFile(f, "default"); err == nil {
+		if err := runAppDeleteFromFile(f); err == nil {
 			t.Fatal("expected error for missing Make.App")
 		}
 	})

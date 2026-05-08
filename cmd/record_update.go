@@ -20,7 +20,6 @@ import (
 )
 
 func newRecordUpdateCmd() *cobra.Command {
-	var profile string
 	var jsonFile string
 
 	cmd := &cobra.Command{
@@ -31,18 +30,17 @@ func newRecordUpdateCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
 			entity, _ := cmd.Parent().Flags().GetString("entity")
-			return runRecordUpdate(app, entity, args, jsonFile, profile)
+			return runRecordUpdate(app, entity, args, jsonFile)
 		},
 	}
 
 	cmd.Flags().StringVar(&jsonFile, "json", "", "path to JSON file containing update data (required)")
 	_ = cmd.MarkFlagRequired("json")
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	return cmd
 }
 
-func runRecordUpdate(app, entity string, recordIDs []string, jsonFile, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runRecordUpdate(app, entity string, recordIDs []string, jsonFile string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

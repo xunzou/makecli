@@ -59,7 +59,7 @@ func TestRunSchema(t *testing.T) {
 		ServerURL = srv.URL
 
 		output := captureStdout(t, func() {
-			if err := runSchema("报销管理", "default"); err != nil {
+			if err := runSchema("报销管理"); err != nil {
 				t.Fatalf("runSchema: %v", err)
 			}
 		})
@@ -81,7 +81,7 @@ func TestRunSchema(t *testing.T) {
 	t.Run("fails without credentials", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runSchema("myapp", "default"); err == nil {
+		if err := runSchema("myapp"); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -95,7 +95,7 @@ func TestRunSchema(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runSchema("myapp", "default"); err == nil {
+		if err := runSchema("myapp"); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -104,7 +104,8 @@ func TestRunSchema(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
-		if err := runSchema("myapp", "nonexistent"); err == nil {
+		setProfile(t, "nonexistent")
+		if err := runSchema("myapp"); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})

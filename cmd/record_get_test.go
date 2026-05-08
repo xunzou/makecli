@@ -36,7 +36,7 @@ func TestRunRecordGet(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			if err := runRecordGet("TODO", "用户", "rec_001", "default", outputTable); err != nil {
+			if err := runRecordGet("TODO", "用户", "rec_001", outputTable); err != nil {
 				t.Fatalf("runRecordGet: %v", err)
 			}
 		})
@@ -66,7 +66,7 @@ func TestRunRecordGet(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			if err := runRecordGet("TODO", "用户", "rec_001", "default", outputJSON); err != nil {
+			if err := runRecordGet("TODO", "用户", "rec_001", outputJSON); err != nil {
 				t.Fatalf("runRecordGet json: %v", err)
 			}
 		})
@@ -82,7 +82,7 @@ func TestRunRecordGet(t *testing.T) {
 	t.Run("fails without credentials", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runRecordGet("TODO", "用户", "rec_001", "default", outputTable); err == nil {
+		if err := runRecordGet("TODO", "用户", "rec_001", outputTable); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -96,7 +96,7 @@ func TestRunRecordGet(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runRecordGet("TODO", "用户", "rec_001", "default", outputTable); err == nil {
+		if err := runRecordGet("TODO", "用户", "rec_001", outputTable); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -105,13 +105,14 @@ func TestRunRecordGet(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
-		if err := runRecordGet("TODO", "用户", "rec_001", "nonexistent", outputTable); err == nil {
+		setProfile(t, "nonexistent")
+		if err := runRecordGet("TODO", "用户", "rec_001", outputTable); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
 
 	t.Run("fails on unsupported output format", func(t *testing.T) {
-		if err := runRecordGet("TODO", "用户", "rec_001", "default", "xml"); err == nil {
+		if err := runRecordGet("TODO", "用户", "rec_001", "xml"); err == nil {
 			t.Fatal("expected error for unsupported output format")
 		}
 	})

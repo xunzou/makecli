@@ -21,7 +21,6 @@ import (
 // ---------------------------------- 命令定义 ----------------------------------
 
 func newApplyCmd() *cobra.Command {
-	var profile string
 	var path string
 
 	cmd := &cobra.Command{
@@ -35,11 +34,10 @@ Supports creating App, Entity, and Relation resources.`,
 		Args:         cobra.NoArgs,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runAppApply(path, profile)
+			return runAppApply(path)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().StringVarP(&path, "file", "f", "", "path to YAML file or directory (required)")
 	_ = cmd.MarkFlagRequired("file")
 	return cmd
@@ -47,8 +45,8 @@ Supports creating App, Entity, and Relation resources.`,
 
 // ---------------------------------- 执行函数 ----------------------------------
 
-func runAppApply(path, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runAppApply(path string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

@@ -26,7 +26,7 @@ func TestRunAppCreate(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppCreate("myapp", "", "", "default"); err != nil {
+		if err := runAppCreate("myapp", "", ""); err != nil {
 			t.Fatalf("runAppCreate: %v", err)
 		}
 	})
@@ -44,7 +44,7 @@ func TestRunAppCreate(t *testing.T) {
 			{"", "empty string"},
 		}
 		for _, tc := range cases {
-			if err := runAppCreate(tc.name, "", "", "default"); err == nil {
+			if err := runAppCreate(tc.name, "", ""); err == nil {
 				t.Errorf("expected error for %s (%s)", tc.name, tc.desc)
 			}
 		}
@@ -57,7 +57,7 @@ func TestRunAppCreate(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppCreate("myapp", "test app", "", "default"); err != nil {
+		if err := runAppCreate("myapp", "test app", ""); err != nil {
 			t.Fatalf("runAppCreate with description: %v", err)
 		}
 	})
@@ -66,7 +66,7 @@ func TestRunAppCreate(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
 		// 未写入任何凭证，预期报错
-		if err := runAppCreate("myapp", "", "", "default"); err == nil {
+		if err := runAppCreate("myapp", "", ""); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -78,7 +78,7 @@ func TestRunAppCreate(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runAppCreate("myapp", "", "", "default"); err == nil {
+		if err := runAppCreate("myapp", "", ""); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -87,8 +87,9 @@ func TestRunAppCreate(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
-		if err := runAppCreate("myapp", "", "", "nonexistent"); err == nil {
+		if err := runAppCreate("myapp", "", ""); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -105,7 +106,7 @@ func TestRunAppCreateFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "app.yaml")
 		writeTestFile(t, f, []byte("name: fileapp\ntype: Make.App\nproperties:\n  description: from file\n"))
 
-		if err := runAppCreateFromFile(f, "default"); err != nil {
+		if err := runAppCreateFromFile(f); err != nil {
 			t.Fatalf("runAppCreateFromFile: %v", err)
 		}
 	})
@@ -120,7 +121,7 @@ func TestRunAppCreateFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "app.yml")
 		writeTestFile(t, f, []byte("name: bareapp\ntype: Make.App\n"))
 
-		if err := runAppCreateFromFile(f, "default"); err != nil {
+		if err := runAppCreateFromFile(f); err != nil {
 			t.Fatalf("runAppCreateFromFile without props: %v", err)
 		}
 	})
@@ -129,7 +130,7 @@ func TestRunAppCreateFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "app.json")
 		writeTestFile(t, f, []byte(`{}`))
 
-		if err := runAppCreateFromFile(f, "default"); err == nil {
+		if err := runAppCreateFromFile(f); err == nil {
 			t.Fatal("expected error for non-yaml file")
 		}
 	})
@@ -138,7 +139,7 @@ func TestRunAppCreateFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "entity.yaml")
 		writeTestFile(t, f, []byte("name: foo\ntype: Make.Entity\napp: bar\n"))
 
-		if err := runAppCreateFromFile(f, "default"); err == nil {
+		if err := runAppCreateFromFile(f); err == nil {
 			t.Fatal("expected error for missing Make.App")
 		}
 	})
@@ -147,7 +148,7 @@ func TestRunAppCreateFromFile(t *testing.T) {
 		f := filepath.Join(t.TempDir(), "multi.yaml")
 		writeTestFile(t, f, []byte("name: a\ntype: Make.App\n---\nname: b\ntype: Make.App\n"))
 
-		if err := runAppCreateFromFile(f, "default"); err == nil {
+		if err := runAppCreateFromFile(f); err == nil {
 			t.Fatal("expected error for multiple Make.App")
 		}
 	})

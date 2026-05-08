@@ -50,7 +50,7 @@ func TestRunEntityList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityList("TODO", "", "default", 1, 20, outputTable, ""); err != nil {
+		if err := runEntityList("TODO", "", 1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runEntityList: %v", err)
 		}
 	})
@@ -82,7 +82,7 @@ func TestRunEntityList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityList("TODO", "", "default", 1, 20, outputTable, "name=任务"); err != nil {
+		if err := runEntityList("TODO", "", 1, 20, outputTable, "name=任务"); err != nil {
 			t.Fatalf("runEntityList with filter: %v", err)
 		}
 	})
@@ -100,7 +100,7 @@ func TestRunEntityList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityList("TODO", "", "default", 1, 20, outputTable, ""); err != nil {
+		if err := runEntityList("TODO", "", 1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runEntityList empty: %v", err)
 		}
 	})
@@ -121,7 +121,7 @@ func TestRunEntityList(t *testing.T) {
 		ServerURL = srv.URL
 
 		output := captureStdout(t, func() {
-			if err := runEntityList("TODO", "", "default", 2, 20, outputJSON, ""); err != nil {
+			if err := runEntityList("TODO", "", 2, 20, outputJSON, ""); err != nil {
 				t.Fatalf("runEntityList json list: %v", err)
 			}
 		})
@@ -164,7 +164,7 @@ func TestRunEntityList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityList("TODO", "项目", "default", 1, 20, outputTable, ""); err != nil {
+		if err := runEntityList("TODO", "项目", 1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runEntityList with name: %v", err)
 		}
 	})
@@ -190,7 +190,7 @@ func TestRunEntityList(t *testing.T) {
 		ServerURL = srv.URL
 
 		output := captureStdout(t, func() {
-			if err := runEntityList("TODO", "项目", "default", 1, 20, outputJSON, ""); err != nil {
+			if err := runEntityList("TODO", "项目", 1, 20, outputJSON, ""); err != nil {
 				t.Fatalf("runEntityList json detail: %v", err)
 			}
 		})
@@ -219,7 +219,7 @@ func TestRunEntityList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityList("TODO", "空实体", "default", 1, 20, outputTable, ""); err != nil {
+		if err := runEntityList("TODO", "空实体", 1, 20, outputTable, ""); err != nil {
 			t.Fatalf("runEntityList no fields: %v", err)
 		}
 	})
@@ -227,7 +227,7 @@ func TestRunEntityList(t *testing.T) {
 	t.Run("fails without credentials", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
-		if err := runEntityList("TODO", "", "default", 1, 20, outputTable, ""); err == nil {
+		if err := runEntityList("TODO", "", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for missing credentials")
 		}
 	})
@@ -236,7 +236,8 @@ func TestRunEntityList(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		saveDefaultToken(t)
 		ServerURL = "http://unused"
-		if err := runEntityList("TODO", "", "nonexistent", 1, 20, outputTable, ""); err == nil {
+		setProfile(t, "nonexistent")
+		if err := runEntityList("TODO", "", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for unknown profile")
 		}
 	})
@@ -250,7 +251,7 @@ func TestRunEntityList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityList("TODO", "", "default", 1, 20, outputTable, ""); err == nil {
+		if err := runEntityList("TODO", "", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error on API failure")
 		}
 	})
@@ -264,25 +265,25 @@ func TestRunEntityList(t *testing.T) {
 		saveDefaultToken(t)
 		ServerURL = srv.URL
 
-		if err := runEntityList("TODO", "不存在", "default", 1, 20, outputTable, ""); err == nil {
+		if err := runEntityList("TODO", "不存在", 1, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error on get API failure")
 		}
 	})
 
 	t.Run("fails when page is less than 1", func(t *testing.T) {
-		if err := runEntityList("TODO", "", "default", 0, 20, outputTable, ""); err == nil {
+		if err := runEntityList("TODO", "", 0, 20, outputTable, ""); err == nil {
 			t.Fatal("expected error for invalid page")
 		}
 	})
 
 	t.Run("fails when size is less than 1", func(t *testing.T) {
-		if err := runEntityList("TODO", "", "default", 1, 0, outputTable, ""); err == nil {
+		if err := runEntityList("TODO", "", 1, 0, outputTable, ""); err == nil {
 			t.Fatal("expected error for invalid size")
 		}
 	})
 
 	t.Run("fails on unsupported output format", func(t *testing.T) {
-		if err := runEntityList("TODO", "", "default", 1, 20, "xml", ""); err == nil {
+		if err := runEntityList("TODO", "", 1, 20, "xml", ""); err == nil {
 			t.Fatal("expected error for unsupported output format")
 		}
 	})

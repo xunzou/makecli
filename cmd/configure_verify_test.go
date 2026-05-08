@@ -47,7 +47,7 @@ func TestRunConfigureVerify(t *testing.T) {
 
 		out := captureStdout(t, func() {
 			// runConfigureVerify 在 valid=true 时不调用 os.Exit
-			_, _ = runConfigureVerify("default", outputTable)
+			_, _ = runConfigureVerify(outputTable)
 		})
 		if !strings.Contains(out, "ok") {
 			t.Errorf("expected 'ok' in output, got: %s", out)
@@ -62,7 +62,7 @@ func TestRunConfigureVerify(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			_, _ = runConfigureVerify("default", outputJSON)
+			_, _ = runConfigureVerify(outputJSON)
 		})
 
 		var r verifyResult
@@ -85,7 +85,7 @@ func TestRunConfigureVerify(t *testing.T) {
 		ServerURL = "http://unused"
 
 		out := captureStdout(t, func() {
-			_, _ = runConfigureVerify("default", outputJSON)
+			_, _ = runConfigureVerify(outputJSON)
 		})
 
 		var r verifyResult
@@ -111,7 +111,7 @@ func TestRunConfigureVerify(t *testing.T) {
 		}
 
 		out := captureStdout(t, func() {
-			_, _ = runConfigureVerify("default", outputJSON)
+			_, _ = runConfigureVerify(outputJSON)
 		})
 
 		var r verifyResult
@@ -134,7 +134,7 @@ func TestRunConfigureVerify(t *testing.T) {
 		ServerURL = srv.URL
 
 		out := captureStdout(t, func() {
-			_, _ = runConfigureVerify("default", outputJSON)
+			_, _ = runConfigureVerify(outputJSON)
 		})
 
 		var r verifyResult
@@ -168,7 +168,7 @@ func TestRunConfigureVerify(t *testing.T) {
 		}
 
 		out := captureStdout(t, func() {
-			_, _ = runConfigureVerify("default", outputJSON)
+			_, _ = runConfigureVerify(outputJSON)
 		})
 
 		var r verifyResult
@@ -189,9 +189,10 @@ func TestRunConfigureVerify(t *testing.T) {
 	t.Run("unknown profile", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		ServerURL = "http://unused"
+		setProfile(t, "nonexistent")
 
 		out := captureStdout(t, func() {
-			_, _ = runConfigureVerify("nonexistent", outputJSON)
+			_, _ = runConfigureVerify(outputJSON)
 		})
 
 		var r verifyResult

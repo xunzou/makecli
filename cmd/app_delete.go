@@ -14,7 +14,6 @@ import (
 )
 
 func newAppDeleteCmd() *cobra.Command {
-	var profile string
 	var file string
 
 	cmd := &cobra.Command{
@@ -26,30 +25,29 @@ func newAppDeleteCmd() *cobra.Command {
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if file != "" {
-				return runAppDeleteFromFile(file, profile)
+				return runAppDeleteFromFile(file)
 			}
 			if len(args) == 0 {
 				return fmt.Errorf("requires app name or -f flag")
 			}
-			return runAppDelete(args[0], profile)
+			return runAppDelete(args[0])
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().StringVarP(&file, "file", "f", "", "path to YAML file containing Make.App resource")
 	return cmd
 }
 
-func runAppDeleteFromFile(path, profile string) error {
+func runAppDeleteFromFile(path string) error {
 	manifest, err := loadAppManifestFromFile(path)
 	if err != nil {
 		return err
 	}
-	return runAppDelete(manifest.Name, profile)
+	return runAppDelete(manifest.Name)
 }
 
-func runAppDelete(name, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runAppDelete(name string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

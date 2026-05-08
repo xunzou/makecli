@@ -19,7 +19,6 @@ import (
 )
 
 func newRecordListCmd() *cobra.Command {
-	var profile string
 	var page int
 	var size int
 	var output string
@@ -34,11 +33,10 @@ func newRecordListCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
 			entity, _ := cmd.Parent().Flags().GetString("entity")
-			return runRecordList(app, entity, profile, page, size, output, fields, sortSpec)
+			return runRecordList(app, entity, page, size, output, fields, sortSpec)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().IntVar(&page, "page", 1, "page number (starts from 1)")
 	cmd.Flags().IntVar(&size, "size", 20, "records per page")
 	cmd.Flags().StringVar(&output, "output", outputTable, "output format (table|json)")
@@ -47,7 +45,7 @@ func newRecordListCmd() *cobra.Command {
 	return cmd
 }
 
-func runRecordList(app, entity, profile string, page, size int, output, fields, sortSpec string) error {
+func runRecordList(app, entity string, page, size int, output, fields, sortSpec string) error {
 	if err := validateOutputFormat(output); err != nil {
 		return err
 	}
@@ -58,7 +56,7 @@ func runRecordList(app, entity, profile string, page, size int, output, fields, 
 		return fmt.Errorf("size must be greater than or equal to 1")
 	}
 
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

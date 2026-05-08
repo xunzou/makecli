@@ -14,8 +14,6 @@ import (
 )
 
 func newRelationDeleteCmd() *cobra.Command {
-	var profile string
-
 	cmd := &cobra.Command{
 		Use:          "delete <name>",
 		Short:        "Delete a relation on Make",
@@ -23,16 +21,15 @@ func newRelationDeleteCmd() *cobra.Command {
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			app, _ := cmd.Parent().Flags().GetString("app")
-			return runRelationDelete(args[0], app, profile)
+			return runRelationDelete(args[0], app)
 		},
 	}
 
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	return cmd
 }
 
-func runRelationDelete(name, app, profile string) error {
-	client, err := newClientFromProfile(profile)
+func runRelationDelete(name, app string) error {
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}

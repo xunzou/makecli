@@ -22,7 +22,6 @@ import (
 // ---------------------------------- 命令定义 ----------------------------------
 
 func newDiffCmd() *cobra.Command {
-	var profile string
 	var path string
 	var output string
 
@@ -36,12 +35,11 @@ The app name is inferred from the Make.App manifest or entity's app field in the
 		Args:         cobra.NoArgs,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDiff(path, profile, output)
+			return runDiff(path, output)
 		},
 	}
 
 	cmd.Flags().StringVarP(&path, "file", "f", "", "path to YAML file or directory (required)")
-	cmd.Flags().StringVar(&profile, "profile", "default", "credentials profile to use")
 	cmd.Flags().StringVar(&output, "output", outputTable, "output format (table|json)")
 	_ = cmd.MarkFlagRequired("file")
 	return cmd
@@ -97,13 +95,13 @@ const (
 
 // ---------------------------------- 执行函数 ----------------------------------
 
-func runDiff(path, profile, output string) error {
+func runDiff(path, output string) error {
 	if err := validateOutputFormat(output); err != nil {
 		return err
 	}
 
 	// 构建客户端
-	client, err := newClientFromProfile(profile)
+	client, err := newClientFromProfile()
 	if err != nil {
 		return err
 	}
